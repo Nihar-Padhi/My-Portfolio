@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nihar Padhi — AWS DevOps / Cloud Engineer</title>
+<meta name="description" content="AWS DevOps / Cloud Engineer. A live operations console — incident response, Terraform, ECS, and cost optimization on AWS. AWS Certified Solutions Architect – Associate.">
+<style>
+  :root{
+    --bg:#06070c;
+    --bg-2:#0a0c13;
+    --panel:#0d1018;
+    --panel-2:#101420;
+    --line:#1a1f2e;
+    --line-hi:#28303f;
+    --ink:#eef1f8;
+    --muted:#98a1b8;
+    --faint:#5c melts;
+    --faint:#5d melts;
+    --faint:#5d6683;
+    --violet:#b79cff;
+    --violet-hot:#8b5cff;
+    --violet-2:#6a3ff0;
+    --glow:#8b5cff55;
+    --cyan:#5ee7ff;
+    --green:#57e39a;
+    --amber:#ffc174;
+    --red:#ff7a7a;
+    --mono:"JetBrains Mono","SF Mono","Cascadia Code",ui-monospace,Menlo,Consolas,monospace;
+    --disp:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+    --body:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;}
+  ::selection{background:var(--violet-hot);color:#fff;}
+  a{color:inherit;text-decoration:none;}
+  :focus-visible{outline:2px solid var(--violet);outline-offset:3px;border-radius:4px;}
+
+  /* ambient */
+  .fx{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;}
+  .fx .grid{position:absolute;inset:-2px;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:56px 56px;opacity:.42;
+    -webkit-mask-image:radial-gradient(ellipse 100% 80% at 50% -10%,#000 25%,transparent 72%);
+    mask-image:radial-gradient(ellipse 100% 80% at 50% -10%,#000 25%,transparent 72%);
+    animation:drift 50s linear infinite;}
+  @keyframes drift{to{background-position:56px 56px,56px 56px;}}
+  .fx .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.38;}
+  .fx .o1{width:560px;height:560px;background:var(--violet-2);top:-180px;left:-100px;animation:f1 26s ease-in-out infinite;}
+  .fx .o2{width:460px;height:460px;background:#2c2470;top:34%;right:-160px;animation:f2 32s ease-in-out infinite;}
+  @keyframes f1{50%{transform:translate(70px,60px);}}
+  @keyframes f2{50%{transform:translate(-60px,50px);}}
+  .spot{position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(560px circle at var(--mx,50%) var(--my,15%),#8b5cff12,transparent 60%);}
+
+  .shell{max-width:1200px;margin:0 auto;padding:0 clamp(18px,4vw,40px);}
+
+  /* ---------- top bar ---------- */
+  .top{position:fixed;top:0;left:0;right:0;z-index:40;
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    background:linear-gradient(#06070cdd,#06070c66);border-bottom:1px solid var(--line);}
+  .top .row{display:flex;align-items:center;gap:20px;height:60px;}
+  .logo{font-family:var(--mono);font-weight:700;font-size:.92rem;display:flex;align-items:center;gap:9px;}
+  .logo .b{width:9px;height:9px;border-radius:2px;background:var(--violet-hot);box-shadow:0 0 12px var(--glow);animation:beat 2.4s ease-in-out infinite;}
+  @keyframes beat{50%{opacity:.5;}}
+  .top .up{margin-left:14px;font-family:var(--mono);font-size:.72rem;color:var(--green);display:flex;align-items:center;gap:7px;}
+  .top .up .d{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+  .top .clock{margin-left:auto;font-family:var(--mono);font-size:.76rem;color:var(--faint);font-variant-numeric:tabular-nums;}
+  @media(max-width:720px){.top .up{display:none;}.top .clock{margin-left:auto;}}
+
+  /* ---------- status rail (desktop) ---------- */
+  .rail{position:fixed;left:24px;top:50%;transform:translateY(-50%);z-index:20;
+    display:flex;flex-direction:column;gap:2px;font-family:var(--mono);font-size:.68rem;}
+  .rail a{display:flex;align-items:center;gap:10px;padding:7px 6px;color:var(--faint);transition:color .2s;position:relative;}
+  .rail a .tick{width:22px;height:1px;background:var(--line-hi);transition:width .25s,background .25s;}
+  .rail a.active{color:var(--violet);}
+  .rail a.active .tick{width:34px;background:var(--violet);box-shadow:0 0 8px var(--glow);}
+  .rail a:hover{color:var(--violet);}
+  @media(max-width:1320px){
+    .rail{position:fixed;left:0;right:0;top:60px;transform:none;flex-direction:row;justify-content:center;
+      gap:4px;padding:9px 10px;background:#06070ce6;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--line);overflow-x:auto;}
+    .rail a{padding:5px 9px;white-space:nowrap;}
+    .rail a .tick{display:none;}
+    .rail a.active{color:var(--violet);}
+  }
+  @media(max-width:1320px){.hero{padding-top:150px;}}
+
+  /* ---------- hero ---------- */
+  .hero{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:120px 0 70px;}
+  @media(max-width:900px){.hero{grid-template-columns:1fr;gap:30px;}}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.7rem,7.5vw,5.4rem);line-height:.94;letter-spacing:-.03em;
+    text-wrap:balance;background:linear-gradient(170deg,#fff 34%,#aab0c8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .tag{font-family:var(--mono);color:var(--violet);font-size:clamp(.95rem,1.9vw,1.18rem);margin-top:18px;letter-spacing:.03em;}
+  .hero .pitch{margin-top:24px;font-size:clamp(1.02rem,1.6vw,1.24rem);color:var(--muted);max-width:52ch;}
+  .hero .pitch b{color:var(--ink);font-weight:600;}
+  .hero .cta{margin-top:34px;display:flex;gap:13px;flex-wrap:wrap;font-family:var(--mono);font-size:.9rem;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    height:50px;padding:0 26px;min-width:172px;border-radius:11px;border:1px solid transparent;
+    font-family:var(--mono);font-size:.9rem;transition:transform .16s,box-shadow .16s,border-color .16s;}
+  .btn.solid{background:var(--violet-hot);color:#fff;box-shadow:0 14px 44px -14px var(--glow);}
+  .btn.solid:hover{transform:translateY(-2px);box-shadow:0 20px 56px -14px var(--glow);}
+  .btn.ghost{border-color:var(--line-hi);color:var(--ink);background:transparent;}
+  .btn.ghost:hover{border-color:var(--violet);transform:translateY(-2px);}
+
+  /* system-status console (hero right) */
+  .console{background:linear-gradient(180deg,#0c0f18,#090b12);border:1px solid var(--line-hi);border-radius:16px;overflow:hidden;
+    box-shadow:0 40px 100px -50px #000,0 0 0 1px #ffffff06 inset;}
+  .console .cbar{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--faint);}
+  .console .cbar .dots{display:flex;gap:6px;}
+  .console .cbar .dots i{width:11px;height:11px;border-radius:50%;display:block;}
+  .console .cbar .dots i:nth-child(1){background:#ff5f56;}.console .cbar .dots i:nth-child(2){background:#ffbd2e;}.console .cbar .dots i:nth-child(3){background:#27c93f;}
+  .console .cbar .ttl{margin-left:6px;}
+  .console .cbody{padding:16px 16px 18px;font-family:var(--mono);font-size:.82rem;}
+  .svc{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateX(-6px);}
+  .svc:last-child{border-bottom:none;}
+  .svc.show{opacity:1;transform:none;transition:opacity .4s,transform .4s;}
+  .svc .s{width:8px;height:8px;border-radius:50%;flex:none;}
+  .svc .s.up{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .svc .s.warm{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:beat 1.4s infinite;}
+  .svc .nm{color:var(--ink);}
+  .svc .stt{margin-left:auto;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;}
+  .svc .stt.up{color:var(--green);}.svc .stt.warm{color:var(--amber);}
+  /* cert badge */
+  .certbadge{margin-top:14px;display:flex;align-items:center;gap:13px;padding:14px 15px;border-radius:12px;
+    background:linear-gradient(135deg,#1a1330,#12101f);border:1px solid #3a2d6a;opacity:0;transform:translateY(8px);}
+  .certbadge.show{opacity:1;transform:none;transition:opacity .5s,transform .5s;}
+  .certbadge .seal{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:radial-gradient(circle at 35% 30%,var(--violet),var(--violet-2));color:#fff;font-weight:700;font-family:var(--disp);font-size:.82rem;
+    box-shadow:0 0 18px var(--glow);}
+  .certbadge .info{line-height:1.35;}
+  .certbadge .info .l{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--violet);}
+  .certbadge .info .n{font-size:.92rem;font-weight:600;color:var(--ink);font-family:var(--body);}
+  .certbadge .vf{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--green);display:flex;align-items:center;gap:5px;white-space:nowrap;}
+
+  /* ---------- section frame ---------- */
+  section.blk{padding:96px 0;position:relative;scroll-margin-top:80px;}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--violet);display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--violet);}
+  h2.title{font-family:var(--disp);font-weight:700;font-size:clamp(1.8rem,4vw,2.9rem);letter-spacing:-.02em;line-height:1.05;margin-bottom:14px;text-wrap:balance;}
+  .lede{color:var(--muted);font-size:1.1rem;max-width:60ch;}
+  .lede b{color:var(--ink);font-weight:600;}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- incident timeline ---------- */
+  .tl{margin-top:50px;position:relative;}
+  .tl .axis{position:relative;height:64px;border-radius:12px;
+    background:linear-gradient(180deg,#0c0f18,#0a0c12);border:1px solid var(--line);overflow:hidden;}
+  .tl .axis .base{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line-hi);}
+  .tl .axis .wave{position:absolute;inset:0;opacity:.5;}
+  .tl .ev{position:absolute;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;
+    border:2px solid var(--bg);cursor:pointer;transition:transform .18s,box-shadow .18s;}
+  .tl .ev.p1{background:var(--red);box-shadow:0 0 0 4px #ff7a7a22;}
+  .tl .ev.net{background:var(--amber);box-shadow:0 0 0 4px #ffc17422;}
+  .tl .ev.mig{background:var(--cyan);box-shadow:0 0 0 4px #5ee7ff22;}
+  .tl .ev:hover,.tl .ev.act{transform:translate(-50%,-50%) scale(1.5);}
+  .tl .labels{display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);font-size:.7rem;color:var(--faint);}
+
+  /* incident detail cards (opened by timeline / always visible list) */
+  .incs{display:grid;gap:15px;margin-top:22px;grid-template-columns:repeat(2,1fr);}
+  @media(max-width:760px){.incs{grid-template-columns:1fr;}}
+  .inc{position:relative;background:linear-gradient(180deg,var(--panel),#0a0d14);border:1px solid var(--line);border-radius:16px;padding:24px 22px;overflow:hidden;
+    transition:transform .22s,border-color .22s,box-shadow .22s;}
+  .inc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0;transition:opacity .22s;}
+  .inc.p1::before{background:var(--red);}.inc.net::before{background:var(--amber);}.inc.mig::before{background:var(--cyan);}
+  .inc:hover,.inc.act{transform:translateY(-4px);border-color:var(--line-hi);box-shadow:0 30px 60px -30px #000;}
+  .inc:hover::before,.inc.act::before{opacity:1;}
+  .inc .meta{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;}
+  .inc .sev{padding:3px 9px;border-radius:6px;}
+  .sev.p1{color:var(--red);background:#ff7a7a1a;border:1px solid #ff7a7a44;}
+  .sev.net{color:var(--amber);background:#ffc1741a;border:1px solid #ffc17444;}
+  .sev.mig{color:var(--cyan);background:#5ee7ff1a;border:1px solid #5ee7ff44;}
+  .inc .id{color:var(--faint);margin-left:auto;}
+  .inc h3{font-family:var(--disp);font-weight:600;font-size:1.18rem;letter-spacing:-.01em;margin-bottom:8px;}
+  .inc p{color:var(--muted);font-size:.96rem;line-height:1.58;}
+  .inc .res{margin-top:13px;font-family:var(--mono);font-size:.71rem;color:var(--violet);letter-spacing:.04em;}
+
+  /* ---------- split about + running ---------- */
+  .split{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:46px;}
+  @media(max-width:860px){.split{grid-template-columns:1fr;}}
+  .glass{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:30px 28px;}
+  .glass p{color:var(--muted);font-size:1.03rem;}.glass p b{color:var(--ink);font-weight:600;}.glass p + p{margin-top:15px;}
+  .run{display:flex;flex-direction:column;font-family:var(--mono);}
+  .run .r{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
+  .run .r:last-child{border-bottom:none;}
+  .run .st{width:9px;height:9px;border-radius:50%;flex:none;}
+  .run .st.on{background:var(--violet);box-shadow:0 0 10px var(--glow);animation:beat 2s infinite;}
+  .run .st.q{background:var(--faint);}
+  .run .nm{color:var(--ink);font-size:.94rem;font-weight:500;}
+  .run .dc{color:var(--faint);font-size:.77rem;font-family:var(--body);display:block;margin-top:2px;}
+
+  .scope{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px;}
+  .scope .s{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;transition:border-color .2s,transform .2s;}
+  .scope .s:hover{border-color:var(--line-hi);transform:translateY(-3px);}
+  .scope .s .k{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);}
+  .scope .s .t{margin-top:7px;font-size:.95rem;color:var(--muted);}
+
+  .stack{display:flex;flex-wrap:wrap;gap:9px;margin-top:40px;font-family:var(--mono);}
+  .stack .t{font-size:.83rem;padding:8px 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--muted);transition:border-color .18s,color .18s,transform .18s;}
+  .stack .t:hover{border-color:var(--violet);color:var(--violet);transform:translateY(-2px);}
+  .stack .t .g{color:var(--violet);}
+
+  .contact-links{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);}
+  .clink{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:12px;font-size:.95rem;border:1px solid var(--line-hi);transition:transform .18s,border-color .18s,box-shadow .18s;}
+  .clink.solid{background:var(--violet-hot);color:#fff;border-color:transparent;box-shadow:0 14px 40px -14px var(--glow);}
+  .clink:hover{transform:translateY(-3px);border-color:var(--violet);}
+  .clink.solid:hover{box-shadow:0 20px 54px -14px var(--glow);}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 60px;font-family:var(--mono);font-size:.75rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;}
+  footer .cert{color:var(--violet);}
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+    .reveal,.svc,.certbadge{opacity:1 !important;transform:none !important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="fx" aria-hidden="true"><div class="grid"></div><div class="orb o1"></div><div class="orb o2"></div></div>
+<div class="spot" aria-hidden="true" id="spot"></div>
+
+<header class="top">
+  <div class="shell row">
+    <span class="logo"><span class="b"></span>nihar.padhi</span>
+    <span class="up"><span class="d"></span>all systems operational</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+<!-- status rail -->
+<nav class="rail" aria-label="section status">
+  <a href="#top" data-sec="top"><span class="tick"></span>overview</a>
+  <a href="#incidents" data-sec="incidents"><span class="tick"></span>incidents</a>
+  <a href="#about" data-sec="about"><span class="tick"></span>operations</a>
+  <a href="#running" data-sec="running"><span class="tick"></span>running</a>
+  <a href="#stack" data-sec="stack"><span class="tick"></span>stack</a>
+  <a href="#contact" data-sec="contact"><span class="tick"></span>contact</a>
+</nav>
+
+<main class="shell">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div>
+      <h1>Nihar&nbsp;Padhi</h1>
+      <p class="tag">AWS DevOps / Cloud Engineer</p>
+      <p class="pitch">I keep production infrastructure running on AWS — operating and automating what the business runs on. And when it breaks at <b>2&nbsp;AM</b>, I'm the one who finds out why, and fixes it.</p>
+      <div class="cta">
+        <a class="btn solid" href="#incidents">▸ view incidents</a>
+        <a class="btn ghost" href="#contact">get in touch</a>
+      </div>
+    </div>
+
+    <!-- self-assembling system console -->
+    <div class="console" aria-hidden="true">
+      <div class="cbar"><span class="dots"><i></i><i></i><i></i></span><span class="ttl">systems — nihar.padhi</span></div>
+      <div class="cbody">
+        <div class="svc" data-i="0"><span class="s up"></span><span class="nm">incident-response</span><span class="stt up">● up</span></div>
+        <div class="svc" data-i="1"><span class="s up"></span><span class="nm">infra-automation</span><span class="stt up">● up</span></div>
+        <div class="svc" data-i="2"><span class="s up"></span><span class="nm">cost-optimization</span><span class="stt up">● up</span></div>
+        <div class="svc" data-i="3"><span class="s up"></span><span class="nm">cloud-migration</span><span class="stt up">● up</span></div>
+        <div class="svc" data-i="4"><span class="s warm"></span><span class="nm">kubernetes</span><span class="stt warm">◷ warming</span></div>
+
+        <div class="certbadge" id="cert">
+          <div class="seal">AWS</div>
+          <div class="info">
+            <div class="l">certified</div>
+            <div class="n">Solutions Architect – Associate</div>
+          </div>
+          <div class="vf">✓ verified</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INCIDENTS -->
+  <section class="blk" id="incidents">
+    <div class="reveal">
+      <p class="eyebrow">incident log</p>
+      <h2 class="title">When it breaks, I find out why.</h2>
+      <p class="lede">Production doesn't fail politely. Here's the incident log — real events I diagnosed and drove to resolution, the evidence-first way. <b>Hover a marker</b> to open the report.</p>
+    </div>
+
+    <div class="tl reveal">
+      <div class="axis">
+        <div class="base"></div>
+        <svg class="wave" viewBox="0 0 1000 64" preserveAspectRatio="none" aria-hidden="true">
+          <polyline fill="none" stroke="#2a3145" stroke-width="1.4"
+            points="0,32 60,30 110,34 160,20 210,44 250,10 290,48 330,31 400,33 470,29 540,35 560,14 590,50 620,30 700,32 770,31 820,18 860,46 900,30 1000,33"/>
+        </svg>
+        <span class="ev p1" data-t="db-saturation" style="left:25%"></span>
+        <span class="ev p1" data-t="scaling-blind" style="left:56%"></span>
+        <span class="ev net" data-t="login-block" style="left:82%"></span>
+        <span class="ev mig" data-t="gcp-aws" style="left:8%"></span>
+      </div>
+      <div class="labels"><span>earlier</span><span>peak-hour events</span><span>recent</span></div>
+    </div>
+
+    <div class="incs">
+      <article class="inc p1 reveal" data-t="db-saturation">
+        <div class="meta"><span class="sev p1">P1 · critical</span><span class="id">db-saturation</span></div>
+        <h3>Database saturation at peak</h3>
+        <p>A severe peak-hour database overload traced to a scheduled-job collision. I followed the evidence through the web tier and drove the fix — read replica, load-aware autoscaling, and connection limits.</p>
+        <div class="res">✓ resolved · RCA authored</div>
+      </article>
+      <article class="inc p1 reveal" data-t="scaling-blind">
+        <div class="meta"><span class="sev p1">P1 · critical</span><span class="id">scaling-blind</span></div>
+        <h3>A scaling failure nobody could see</h3>
+        <p>Recurring instance replacements turned out to be I/O-bound media traffic invisible to CPU-based autoscaling. I disproved the team's first hypothesis with metrics, then fixed the scaling signal itself.</p>
+        <div class="res">✓ resolved · signal corrected</div>
+      </article>
+      <article class="inc net reveal" data-t="login-block">
+        <div class="meta"><span class="sev net">NET · outage</span><span class="id">login-block</span></div>
+        <h3>Login outage from a security-group misconfig</h3>
+        <p>Auth calls were blocked before reaching the app. I isolated it to a security-group and routing issue and remediated with WAF allow-lists and routing changes — tradeoffs written down.</p>
+        <div class="res">✓ resolved · hardened</div>
+      </article>
+      <article class="inc mig reveal" data-t="gcp-aws">
+        <div class="meta"><span class="sev mig">MIG · shipped</span><span class="id">gcp→aws</span></div>
+        <h3>GCP → AWS production migration</h3>
+        <p>Contributed to a production migration with minimal downtime — secure multi-tier VPC design and reusable Terraform modules for repeatable, reviewable deployments.</p>
+        <div class="res">✓ shipped · IaC</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- OPERATIONS -->
+  <section class="blk" id="about">
+    <div class="reveal">
+      <p class="eyebrow">the day-to-day</p>
+      <h2 class="title">Most of the job is keeping the lights on.</h2>
+    </div>
+    <div class="split">
+      <div class="glass reveal">
+        <p>AWS-certified DevOps engineer. Most of my day is <b>operational</b> — triaging alerts, resolving infrastructure tickets, investigating failures, reading logs and AWS Health events, keeping backups green, and writing evidence-based RCAs when something goes wrong.</p>
+        <p>Alongside that I build and maintain the infrastructure itself with <b>Terraform</b>, CI/CD pipelines, and containers on <b>Amazon ECS</b>. Because the team is small, I work the whole stack — network, compute, data, security, and cost — rather than one narrow slice.</p>
+      </div>
+      <div class="glass reveal" id="running">
+        <p class="eyebrow" style="margin-bottom:16px;">currently running</p>
+        <div class="run">
+          <div class="r"><span class="st on"></span><span><span class="nm">kubernetes</span><span class="dc">deployments · services · ingress · debugging</span></span></div>
+          <div class="r"><span class="st on"></span><span><span class="nm">aws-bedrock</span><span class="dc">operating LLM-API workloads on AWS</span></span></div>
+          <div class="r"><span class="st q"></span><span><span class="nm">github-actions</span><span class="dc">CI/CD pipelines · queued</span></span></div>
+          <div class="r"><span class="st q"></span><span><span class="nm">terraform-assoc</span><span class="dc">HashiCorp cert · queued</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="scope">
+      <div class="s reveal"><div class="k">alerts</div><div class="t">triage &amp; respond to production alerts</div></div>
+      <div class="s reveal"><div class="k">incidents</div><div class="t">investigate, root-cause, write it up</div></div>
+      <div class="s reveal"><div class="k">backups</div><div class="t">verify they run across every project</div></div>
+      <div class="s reveal"><div class="k">cost</div><div class="t">rightsize with tradeoffs made explicit</div></div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="blk" id="stack">
+    <div class="reveal">
+      <p class="eyebrow">the stack</p>
+      <h2 class="title">Tools I actually use.</h2>
+    </div>
+    <div class="stack reveal">
+      <span class="t"><span class="g">cloud/</span>AWS</span><span class="t">EC2</span><span class="t">VPC</span>
+      <span class="t">IAM</span><span class="t">ECS / Fargate</span><span class="t">Lambda</span><span class="t">ALB</span>
+      <span class="t">CloudFront</span><span class="t">WAF</span><span class="t">Aurora MySQL</span><span class="t">ElastiCache</span>
+      <span class="t"><span class="g">iac/</span>Terraform</span><span class="t">Docker</span>
+      <span class="t"><span class="g">ci/</span>GitLab CI</span><span class="t">GitHub Actions</span>
+      <span class="t"><span class="g">obs/</span>CloudWatch</span><span class="t">Grafana</span><span class="t">Prometheus</span>
+      <span class="t"><span class="g">lang/</span>Python</span><span class="t">Bash</span><span class="t">Linux</span>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="blk" id="contact">
+    <div class="reveal">
+      <p class="eyebrow">get in touch</p>
+      <h2 class="title">Let's talk infrastructure.</h2>
+      <p class="lede">Open to conversations about AWS, DevOps, and cloud roles. Fastest way to reach me:</p>
+    </div>
+    <div class="contact-links reveal">
+      <a class="clink solid" href="mailto:padhinihar006@gmail.com">✦ Email me</a>
+      <a class="clink" href="https://www.linkedin.com/in/nihar-padhi-0b077a294" target="_blank" rel="noopener">↗ LinkedIn</a>
+    </div>
+  </section>
+
+  <footer>
+    <span class="cert">● AWS Certified Solutions Architect – Associate (SAA-C03)</span>
+    <span>Bangalore, India</span>
+    <span>© <span id="yr">2026</span> Nihar Padhi</span>
+  </footer>
+</main>
+
+<script>
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // live IST clock in top bar
+  (function(){
+    var el=document.getElementById('clock');
+    function tick(){el.textContent=new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Kolkata',hour12:false})+' IST';}
+    tick();setInterval(tick,1000);
+  })();
+
+  // cursor spotlight
+  var spot=document.getElementById('spot');
+  window.addEventListener('pointermove',function(e){
+    spot.style.setProperty('--mx',e.clientX+'px');spot.style.setProperty('--my',e.clientY+'px');
+  },{passive:true});
+
+  // scroll reveal
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
+  },{threshold:.14});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+  // hero console: services boot in sequence, then cert badge verifies
+  (function(){
+    var svcs=document.querySelectorAll('.svc'),cert=document.getElementById('cert');
+    if(reduce){svcs.forEach(function(s){s.classList.add('show');});cert.classList.add('show');return;}
+    svcs.forEach(function(s,i){setTimeout(function(){s.classList.add('show');},350+i*220);});
+    setTimeout(function(){cert.classList.add('show');},350+svcs.length*220+250);
+  })();
+
+  // status rail: highlight active section
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var map={};links.forEach(function(a){map[a.dataset.sec]=a;});
+    var secs=['top','incidents','about','running','stack','contact']
+      .map(function(id){return document.getElementById(id);}).filter(Boolean);
+    var so=new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        if(en.isIntersecting){
+          links.forEach(function(a){a.classList.remove('active');});
+          var id=en.target.id; if(id==='running')id='running';
+          if(map[id])map[id].classList.add('active');
+        }
+      });
+    },{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(s){so.observe(s);});
+  })();
+
+  // timeline <-> incident cards linking
+  (function(){
+    var evs=document.querySelectorAll('.tl .ev');
+    var cards={};document.querySelectorAll('.inc').forEach(function(c){cards[c.dataset.t]=c;});
+    function focus(t,on){
+      var c=cards[t]; if(!c)return;
+      c.classList.toggle('act',on);
+      var e=document.querySelector('.tl .ev[data-t="'+t+'"]'); if(e)e.classList.toggle('act',on);
+    }
+    evs.forEach(function(e){
+      var t=e.dataset.t;
+      e.addEventListener('mouseenter',function(){focus(t,true);});
+      e.addEventListener('mouseleave',function(){focus(t,false);});
+      e.addEventListener('click',function(){var c=cards[t];if(c)c.scrollIntoView({behavior:'smooth',block:'center'});});
+    });
+    document.querySelectorAll('.inc').forEach(function(c){
+      var t=c.dataset.t;
+      c.addEventListener('mouseenter',function(){var e=document.querySelector('.tl .ev[data-t="'+t+'"]');if(e)e.classList.add('act');});
+      c.addEventListener('mouseleave',function(){var e=document.querySelector('.tl .ev[data-t="'+t+'"]');if(e)e.classList.remove('act');});
+    });
+  })();
+</script>
+
+</body>
+</html>
