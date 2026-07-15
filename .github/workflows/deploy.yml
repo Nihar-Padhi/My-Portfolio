@@ -21,6 +21,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::368351960346:role/github-actions-portfolio-deploy
           aws-region: ap-south-1
+          role-skip-session-tagging: true
 
       - name: Sync site to S3
         run: |
