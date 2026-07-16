@@ -178,6 +178,22 @@
   .inc p{color:var(--muted);font-size:.96rem;line-height:1.58;}
   .inc .res{margin-top:13px;font-family:var(--mono);font-size:.71rem;color:var(--violet);letter-spacing:.04em;}
 
+  /* ---------- projects ---------- */
+  .projects{display:grid;gap:16px;margin-top:46px;grid-template-columns:repeat(3,1fr);}
+  @media(max-width:900px){.projects{grid-template-columns:1fr;}}
+  .proj{position:relative;background:linear-gradient(180deg,var(--panel),#0b0e15);border:1px solid var(--line);
+    border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;
+    transition:transform .22s,border-color .22s,box-shadow .22s;}
+  .proj:hover{transform:translateY(-4px);border-color:var(--line-hi);box-shadow:0 30px 60px -30px #000;}
+  .proj-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-family:var(--mono);
+    font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;}
+  .proj-status{color:var(--violet);}
+  .proj-id{color:var(--faint);margin-left:auto;}
+  .proj h3{font-family:var(--disp);font-weight:600;font-size:1.16rem;letter-spacing:-.01em;margin-bottom:9px;}
+  .proj p{color:var(--muted);font-size:.94rem;line-height:1.58;flex:1;}
+  .proj-stack{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);
+    font-family:var(--mono);font-size:.72rem;color:var(--faint);line-height:1.7;}
+
   /* ---------- split about + running ---------- */
   .split{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:46px;}
   @media(max-width:860px){.split{grid-template-columns:1fr;}}
@@ -238,6 +254,7 @@
   <a href="#incidents" data-sec="incidents"><span class="tick"></span>incidents</a>
   <a href="#about" data-sec="about"><span class="tick"></span>operations</a>
   <a href="#running" data-sec="running"><span class="tick"></span>running</a>
+  <a href="#projects" data-sec="projects"><span class="tick"></span>projects</a>
   <a href="#stack" data-sec="stack"><span class="tick"></span>stack</a>
   <a href="#contact" data-sec="contact"><span class="tick"></span>contact</a>
 </nav>
@@ -339,6 +356,7 @@
       <div class="glass reveal">
         <p>AWS-certified DevOps engineer. Most of my day is <b>operational</b> — triaging alerts, resolving infrastructure tickets, investigating failures, reading logs and AWS Health events, keeping backups green, and writing evidence-based RCAs when something goes wrong.</p>
         <p>Alongside that I build and maintain the infrastructure itself with <b>Terraform</b>, CI/CD pipelines, and containers on <b>Amazon ECS</b>. Because the team is small, I work the whole stack — network, compute, data, security, and cost — rather than one narrow slice.</p>
+        <p>My approach is <b>evidence over guesswork</b>: when something breaks, I follow the metrics and logs to the real cause before changing anything — then fix it so it can't recur, and write down why. It's the same discipline behind every incident in the log above.</p>
       </div>
       <div class="glass reveal" id="running">
         <p class="eyebrow" style="margin-bottom:16px;">currently running</p>
@@ -355,6 +373,46 @@
       <div class="s reveal"><div class="k">incidents</div><div class="t">investigate, root-cause, write it up</div></div>
       <div class="s reveal"><div class="k">backups</div><div class="t">verify they run across every project</div></div>
       <div class="s reveal"><div class="k">cost</div><div class="t">rightsize with tradeoffs made explicit</div></div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="blk" id="projects">
+    <div class="reveal">
+      <p class="eyebrow">projects</p>
+      <h2 class="title">Platforms I've built and run.</h2>
+      <p class="lede">The systems behind the incidents — production AWS platforms I've architected, migrated, and operated end to end.</p>
+    </div>
+    <div class="projects">
+      <article class="proj reveal">
+        <div class="proj-head">
+          <span class="proj-status">● live</span>
+          <span class="proj-id">real-estate-platform</span>
+        </div>
+        <h3>High-Traffic Real-Estate Web Platform</h3>
+        <p>A Drupal platform migrated from GCP to AWS with minimal downtime. Secure multi-tier VPC, CloudFront &rarr; ALB &rarr; Varnish &rarr; PHP-FPM &rarr; ElastiCache &rarr; Aurora, provisioned as reusable Terraform modules. I own capacity, cost, and incident response (see incidents above).</p>
+        <div class="proj-stack">AWS · Terraform · EC2/ASG · ALB · CloudFront · WAF · Aurora MySQL · ElastiCache · CloudWatch</div>
+      </article>
+
+      <article class="proj reveal">
+        <div class="proj-head">
+          <span class="proj-status">● live</span>
+          <span class="proj-id">saas-platform</span>
+        </div>
+        <h3>Enterprise SaaS Platform</h3>
+        <p>Redesigned the AWS infrastructure through a company rebrand for a SaaS platform serving 1,400+ companies and 100,000+ users — Auto Scaling behind ALBs, Aurora read replicas and ElastiCache for performance, delivered as Terraform IaC with operational dashboards.</p>
+        <div class="proj-stack">AWS · Terraform · ECS · ALB · Auto Scaling · Aurora MySQL · ElastiCache · Grafana</div>
+      </article>
+
+      <article class="proj reveal">
+        <div class="proj-head">
+          <span class="proj-status">● live</span>
+          <span class="proj-id">serverless-ecommerce</span>
+        </div>
+        <h3>Serverless E-commerce Platform</h3>
+        <p>A container and serverless architecture on ECS Fargate with Terraform IaC and centralized logging — eliminating server-management overhead. Event-driven automation via Lambda, with ALB, IAM, and VPC networking for security and observability.</p>
+        <div class="proj-stack">AWS · ECS Fargate · Terraform · Lambda · ALB · VPC · IAM · CloudWatch</div>
+      </article>
     </div>
   </section>
 
@@ -430,7 +488,7 @@
   (function(){
     var links=Array.prototype.slice.call(document.querySelectorAll('.rail a'));
     var map={};links.forEach(function(a){map[a.dataset.sec]=a;});
-    var secs=['top','incidents','about','running','stack','contact']
+    var secs=['top','incidents','about','running','projects','stack','contact']
       .map(function(id){return document.getElementById(id);}).filter(Boolean);
     var so=new IntersectionObserver(function(es){
       es.forEach(function(en){
