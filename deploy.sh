@@ -15,6 +15,7 @@ aws s3 sync . "s3://$BUCKET" \
   --profile "$AWS_PROFILE" \
   --delete \
   --exclude ".git/*" \
+  --exclude ".github/*" \
   --exclude "*.md" \
   --exclude "deploy.sh"
 
