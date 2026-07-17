@@ -8,9 +8,11 @@ set -euo pipefail
 
 BUCKET="niharpadhi-site"
 DISTRIBUTION_ID="E2O3U6XU96WGKY"
+AWS_PROFILE="${AWS_PROFILE:-personal-portfolio}"
 
-echo "→ Syncing site to s3://$BUCKET ..."
+echo "→ Syncing site to s3://$BUCKET with AWS profile '$AWS_PROFILE' ..."
 aws s3 sync . "s3://$BUCKET" \
+  --profile "$AWS_PROFILE" \
   --delete \
   --exclude ".git/*" \
   --exclude "*.md" \
@@ -18,6 +20,7 @@ aws s3 sync . "s3://$BUCKET" \
 
 echo "→ Invalidating CloudFront cache ..."
 aws cloudfront create-invalidation \
+  --profile "$AWS_PROFILE" \
   --distribution-id "$DISTRIBUTION_ID" \
   --paths "/*" \
   --query 'Invalidation.Id' --output text
